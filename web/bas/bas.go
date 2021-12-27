@@ -2,19 +2,18 @@ package bas
 
 import (
 	"github.com/go-rod/rod"
+	"github.com/michalslomczynski/bas-opencv/config"
 	"github.com/pkg/errors"
 )
 
 const (
-	appUrl = "https://beta.blockapescissors.com"
-	// Selectors
-	app = "canvas"
+	appSelector = "canvas"
 )
 
 func OpenBASPage(b *rod.Browser) (*rod.Page, error) {
 	var page *rod.Page
 	err := rod.Try(func() {
-		page = b.MustPage(appUrl).MustWaitLoad()
+		page = b.MustPage(config.Cfg.AppUrl).MustWaitLoad()
 	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to open BAS page")
@@ -26,10 +25,10 @@ func OpenBASPage(b *rod.Browser) (*rod.Page, error) {
 func GetCanvas(p *rod.Page) (*rod.Element, error) {
 	var appElem *rod.Element
 	err := rod.Try(func() {
-		appElem = p.MustElement(app).MustWaitLoad()
+		appElem = p.MustElement(appSelector).MustWaitLoad()
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to find app element")
+		return nil, errors.Wrapf(err, "failed to find appSelector element")
 	}
 	return appElem, nil
 }

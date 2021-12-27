@@ -48,12 +48,13 @@ func Setup() (*rod.Element, error) {
 }
 
 func Restart(canvas *rod.Element) (*rod.Element, error) {
-	BASPage, err := bas.OpenBASPage(canvas.Page().Browser())
-	if err != nil {
-		return nil, err
-	}
+	log.Println("restarting...")
 
-	canvas, err = bas.GetCanvas(BASPage)
+	BASPage := canvas.Page()
+	BASPage.Reload()
+	BASPage.MustWaitLoad()
+
+	canvas, err := bas.GetCanvas(BASPage)
 	if err != nil {
 		return nil, err
 	}

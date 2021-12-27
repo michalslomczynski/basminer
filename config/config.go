@@ -16,6 +16,7 @@ type Config struct {
 	LobbyName        string `yaml:"lobbyName"`
 	WalletPassphrase string `yaml:"walletPassphrase"`
 	WalletPassword   string `yaml:"walletPassword"`
+	AppUrl           string `yaml:"appUrl"`
 }
 
 var Cfg *Config

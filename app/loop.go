@@ -53,21 +53,21 @@ func Loop(canvas *rod.Element) error {
 			fmt.Println("found lobby state")
 			err := SelectRoom(canvas)
 			if err != nil {
-				return err
+				log.Println(time.Now(), err)
 			}
 			continue
 		} else if state.round {
 			fmt.Println("found round state")
 			err := PlayRound(canvas)
 			if err != nil {
-				return err
+				log.Println(time.Now(), err)
 			}
 			continue
 		} else if state.menu {
 			fmt.Println("found menu state")
 			err := GoToLobby(canvas)
 			if err != nil {
-				return err
+				log.Println(time.Now(), err)
 			}
 			continue
 		} else {
