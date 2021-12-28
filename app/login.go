@@ -25,7 +25,7 @@ const (
 	// Accuracies for SqDiff
 	acceptButtonDisabledAcc  = 0.01
 	acceptButtonEnabledAcc   = 0.04
-	usernameAcc              = 0.003
+	usernameAcc              = 0.02
 	connectToWalletButtonAcc = 0.05
 )
 
