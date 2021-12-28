@@ -49,13 +49,17 @@ func Login(canvas *rod.Element) error {
 	// TODO: replace with working native browser events - requires isTrusted property
 	robotgo.TypeStr(config.Cfg.Username)
 
-	x, y, err = ConnectToWalletButton(canvas)
+	err = wallet.SelectMetaMask(canvas.Page())
 	if err != nil {
 		return err
 	}
-	util.Click(canvas, x, y)
 
-	err = SignMetaMask(canvas)
+	err = wallet.ConnectWithMetamask(canvas.Page())
+	if err != nil {
+		return err
+	}
+
+	err = wallet.SignTransaction(canvas.Page())
 	if err != nil {
 		return err
 	}
@@ -70,16 +74,32 @@ func Login(canvas *rod.Element) error {
 	return nil
 }
 
-func SignMetaMask(canvas *rod.Element) error {
-	err := wallet.SelectMetaMask(canvas.Page())
+func LoginAfterRestart(canvas *rod.Element) error {
+	// TODO: replace with working native browser events - requires isTrusted property
+	robotgo.TypeStr(config.Cfg.Username)
+
+	x, y, err := ConnectToWalletButton(canvas)
+	if err != nil {
+		return err
+	}
+	util.Click(canvas, x, y)
+
+	err = wallet.SelectMetaMask(canvas.Page())
 	if err != nil {
 		return err
 	}
 
-	err = wallet.AuthorizeTransaction(canvas.Page())
+	err = wallet.SignTransaction(canvas.Page())
 	if err != nil {
 		return err
 	}
+
+	x, y, err = PlayButton(canvas)
+	if err != nil {
+		return err
+	}
+
+	util.Click(canvas, x, y)
 
 	return nil
 }

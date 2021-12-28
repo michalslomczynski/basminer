@@ -47,8 +47,8 @@ const (
 	saveNewNetworkButtonSelector           = "#app-content > div > div.main-container-wrapper > div > div.settings-page__content > div.settings-page__content__modules > div > div.networks-tab__content > div > div.networks-tab__add-network-form-footer > button.button.btn--rounded.btn-primary"
 )
 
-// ConnectToWallet logins to MetaMask wallet plugin in browser.
-func ConnectToWallet(b *rod.Browser) (*rod.Page, error) {
+// SignInToWallet logins to MetaMask wallet plugin in browser.
+func SignInToWallet(b *rod.Browser) (*rod.Page, error) {
 	// Force browser to focus
 	b.MustPage("")
 
@@ -122,7 +122,7 @@ func loginToWallet(page *rod.Page) error {
 	return nil
 }
 
-func signWalletTransaction(page *rod.Page) error {
+func ConnectWithMetamask(page *rod.Page) error {
 	walletPage, err := findMetaMaskNotificationPage(page)
 	if err != nil {
 		return err
@@ -149,21 +149,7 @@ func SelectMetaMask(page *rod.Page) error {
 	return nil
 }
 
-func AuthorizeTransaction(page *rod.Page) error {
-	err := signWalletTransaction(page)
-	if err != nil {
-		return err
-	}
-
-	err = confirmSignature(page)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func confirmSignature(page *rod.Page) error {
+func SignTransaction(page *rod.Page) error {
 	walletPage, err := findMetaMaskNotificationPage(page)
 	if err != nil {
 		return err

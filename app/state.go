@@ -23,13 +23,12 @@ type StateAssets struct {
 
 // StateUpdate provides performant feedback about current state of image
 func StateUpdate(image *cv.Mat, assets *StateAssets, state *State) {
-	fmt.Printf("\nfound lobby ")
+	fmt.Printf("found lobby ")
 	state.lobby = cvutil.IsMatElementVisible(image, assets.lobby, assets.offset, mode, roomNameAcc)
 	fmt.Printf("\nfound menu ")
 	state.menu = cvutil.IsMatElementVisible(image, assets.menu, assets.offset, mode, battleModeButtonAcc)
 	fmt.Printf("\nfound round ")
 	state.round = cvutil.IsMatElementVisible(image, assets.round, assets.offset, mode, battleModeBannerAcc)
-	fmt.Println()
 }
 
 func loadStateAssets(canvas *rod.Element) (*StateAssets, error) {

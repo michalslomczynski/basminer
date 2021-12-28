@@ -6,6 +6,7 @@ import (
 	"github.com/michalslomczynski/bas-opencv/metamask"
 	"github.com/michalslomczynski/bas-opencv/web/bas"
 	"github.com/michalslomczynski/bas-opencv/web/wallet"
+	"github.com/pkg/errors"
 	"log"
 )
 
@@ -17,11 +18,10 @@ func Setup() (*rod.Element, error) {
 
 	b := browser.LaunchBrowserWithExtension(metamask.FileName, false)
 
-	walletPage, err := wallet.ConnectToWallet(b)
+	_, err = wallet.SignInToWallet(b)
 	if err != nil {
 		return nil, err
 	}
-	_ = walletPage
 
 	BASPage, err := bas.OpenBASPage(b)
 	if err != nil {
@@ -48,6 +48,9 @@ func Setup() (*rod.Element, error) {
 }
 
 func Restart(canvas *rod.Element) (*rod.Element, error) {
+	if canvas == nil {
+		return nil, errors.New("internal error occured")
+	}
 	log.Println("restarting...")
 
 	BASPage := canvas.Page()
@@ -59,7 +62,7 @@ func Restart(canvas *rod.Element) (*rod.Element, error) {
 		return nil, err
 	}
 
-	err = Login(canvas)
+	err = LoginAfterRestart(canvas)
 	if err != nil {
 		return nil, err
 	}
