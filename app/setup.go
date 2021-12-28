@@ -59,12 +59,6 @@ func Restart(canvas *rod.Element) (*rod.Element, error) {
 		return nil, err
 	}
 
-	err = AcceptTerms(canvas)
-	if err != nil {
-		// Proceed with this error
-		log.Println(err)
-	}
-
 	err = Login(canvas)
 	if err != nil {
 		return nil, err

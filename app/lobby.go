@@ -2,7 +2,9 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/proto"
 	"github.com/go-vgo/robotgo"
 	"github.com/michalslomczynski/bas-opencv/config"
 	"github.com/michalslomczynski/bas-opencv/cvutil"
@@ -24,7 +26,10 @@ const (
 	readyBoxPath           = prefix + "ready_box.png"
 	loadingPath            = prefix + "loading.png"
 	roomNamePath           = prefix + "room_name.png"
+	lobbyScrollSpecialPath = prefix + "lobby_scroll_special.png"
 	// Accuracies
+	lobbyScrollAcc         = 0.08
+	lobbyScrollSpecialAcc  = 0.09
 	lobbyJoinButtonAcc     = 0.04
 	lobbyFailedOkButtonAcc = 0.04
 	roomNameAcc            = 0.06
@@ -35,7 +40,8 @@ func SelectRoom(canvas *rod.Element) error {
 	ctx, cancel := context.WithTimeout(context.Background(), lobbyLoopTimeout)
 	defer cancel()
 
-	m := canvas.Page().Mouse
+	scrollLobby(canvas)
+
 	for {
 		x, y, err := findJoinButton(canvas)
 		if err == nil {
@@ -44,16 +50,6 @@ func SelectRoom(canvas *rod.Element) error {
 				util.Click(canvas, x, y)
 				time.Sleep(time.Millisecond * 300)
 			}
-			_, _, err = findLoading(canvas)
-			if err == nil {
-				break
-			}
-		}
-
-		// Try to scroll down list of rooms because of known server bug
-		for i := 0; i < 15; i++ {
-			m.Move(float64(x), float64(y), 1)
-			m.Scroll(0, 10000000, 1)
 		}
 
 		x, y, err = findJoinFailedOkButton(canvas)
@@ -108,11 +104,26 @@ func NewGame(canvas *rod.Element) error {
 }
 
 func findLobbyScrollButton(canvas *rod.Element) (int, int, error) {
-	return cvutil.FindElementGeneric(canvas, lobbyScrollBarPath, mode, 0.05, timeout)
+	return cvutil.FindElementGeneric(canvas, lobbyScrollBarPath, mode, 0.05, lobbyTimeout)
+}
+
+func findAndClickLobbyScrollButtonWithoutRetry(canvas *rod.Element) {
+	x, y, acc, err := cvutil.FindElementGenericWithoutRetry(canvas, lobbyScrollBarPath, mode)
+	fmt.Printf("found lobby scroll at %v %v with accuracy: %v\n", x, y, acc)
+	if err == nil {
+		if mode < 2 {
+			if acc < lobbyScrollAcc {
+				util.Click(canvas, x, y)
+			}
+		} else {
+			if acc > lobbyScrollAcc {
+				util.Click(canvas, x, y)
+			}
+		}
+	}
 }
 
 func findJoinButton(canvas *rod.Element) (int, int, error) {
-	canvas.MustScreenshot("debugSct.png")
 	return cvutil.FindElementGeneric(canvas, joinButtonPath, mode, lobbyJoinButtonAcc, lobbyTimeout)
 }
 
@@ -157,4 +168,42 @@ func findLoading(canvas *rod.Element) (int, int, error) {
 
 func findRoomName(canvas *rod.Element) (int, int, error) {
 	return cvutil.FindElementGeneric(canvas, roomNamePath, mode, 0.01, lobbyTimeout)
+}
+
+func scrollLobby(canvas *rod.Element) {
+	img, _ := cvutil.ElemToMat(canvas)
+	scroll, _ := cvutil.LoadAssetToMat(lobbyScrollSpecialPath)
+	x, y, acc := cvutil.GetMatchLocation(img, scroll, mode)
+	fmt.Println(acc)
+	if mode < 2 {
+		if acc > lobbyScrollSpecialAcc {
+			return
+		}
+	} else {
+		if acc < lobbyScrollSpecialAcc {
+			return
+		}
+	}
+
+	shape, err := canvas.Shape()
+	if err != nil {
+		return
+	}
+
+	x += int(shape.Box().X)
+	y += int(shape.Box().Y)
+
+	tsz := scroll.Size()
+	tx := tsz[0]
+	ty := tsz[0]
+
+	x += tx
+	y += ty
+
+	m := canvas.Page().Mouse
+	m.Move(float64(x), float64(y), 1)
+	for i := 0; i < 15; i++ {
+		m.Click(proto.InputMouseButtonLeft)
+	}
+	fmt.Printf("found scroll bar at %v %v with acc %v", x, y, acc)
 }

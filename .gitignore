@@ -1,6 +1,6 @@
 *.zip
 *-app*
-*.png
+/*.png
 test
 test/*
 .idea

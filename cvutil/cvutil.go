@@ -177,7 +177,7 @@ func FindMatElement(img, tmpl *cv.Mat, offset *proto.DOMRect, mode cv.TemplateMa
 
 func IsMatElementVisible(img, tmpl *cv.Mat, offset *proto.DOMRect, mode cv.TemplateMatchMode, accuracy float32) bool {
 	_, _, acc := FindMatElement(img, tmpl, offset, mode)
-	fmt.Printf("found mat element with accuracy %v\n", acc)
+	fmt.Printf("with accuracy %v", acc)
 	if mode < 2 {
 		if acc < accuracy {
 			return true

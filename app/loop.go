@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	resetAfter = 100
+	resetAfter = 20
 )
 
 func MainLopp() {
