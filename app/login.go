@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"github.com/go-rod/rod"
 	"github.com/go-vgo/robotgo"
 	"github.com/michalslomczynski/bas-opencv/config"
@@ -44,10 +45,17 @@ func Login(canvas *rod.Element) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("found username at", x, y)
 	util.Click(canvas, x, y)
 
 	// TODO: replace with working native browser events - requires isTrusted property
 	robotgo.TypeStr(config.Cfg.Username)
+
+	x, y, err = ConnectToWalletButton(canvas)
+	if err != nil {
+		return err
+	}
+	util.Click(canvas, x, y)
 
 	err = wallet.SelectMetaMask(canvas.Page())
 	if err != nil {

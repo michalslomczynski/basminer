@@ -32,11 +32,11 @@ func ElemSctToBytes(elem *rod.Element) ([]byte, error) {
 }
 
 func ElemSctToImage(elem *rod.Element) (*image.Image, error) {
-	bb, err := ElemSctToBytes(elem)
+	b, err := ElemSctToBytes(elem)
 	if err != nil {
 		return nil, err
 	}
-	img, _, err := image.Decode(bytes.NewReader(bb))
+	img, _, err := image.Decode(bytes.NewReader(b))
 	if err != nil {
 		return nil, err
 	}

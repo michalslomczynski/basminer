@@ -103,12 +103,12 @@ func FindElementGeneric(canvas *rod.Element, templatePath string, mode cv.Templa
 	defer cancel()
 
 	for {
-		bb, err := util.ElemSctToBytes(canvas)
+		b, err := util.ElemSctToBytes(canvas)
 		if err != nil {
 			return 0, 0, err
 		}
 
-		img, err := BytesToMat(bb)
+		img, err := BytesToMat(b)
 		if err != nil {
 			return 0, 0, err
 		}
@@ -192,12 +192,12 @@ func IsMatElementVisible(img, tmpl *cv.Mat, offset *proto.DOMRect, mode cv.Templ
 }
 
 func ElemToMat(elem *rod.Element) (*cv.Mat, error) {
-	bb, err := util.ElemSctToBytes(elem)
+	b, err := util.ElemSctToBytes(elem)
 	if err != nil {
 		return nil, err
 	}
 
-	img, err := BytesToMat(bb)
+	img, err := BytesToMat(b)
 	if err != nil {
 		return nil, err
 	}

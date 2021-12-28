@@ -11,11 +11,12 @@ import (
 )
 
 const (
-	extensionUrl         = "chrome-extension://nojmdacjahoombflmhcebljpcpjfogei/home.html#initialize/welcome"
-	extensionPageTimeout = 10
-	extensionPageTitle   = "MetaMask"
-	selectorsTimeout     = 2 * time.Second
-	transactionPageTitle = "MetaMask Notification"
+	extensionUrl           = "chrome-extension://nojmdacjahoombflmhcebljpcpjfogei/home.html#initialize/welcome"
+	extensionPageTimeout   = 40
+	extensionPageTitle     = "MetaMask"
+	selectorsTimeout       = 2 * time.Second
+	transactionPageTitle   = "MetaMask Notification"
+	transactionPageTimeout = 20
 	// Binance network connection data
 	networkName      = "Smart Chain"
 	RPCURL           = "https://bsc-dataseed.binance.org/"
@@ -167,16 +168,15 @@ func SignTransaction(page *rod.Page) error {
 }
 
 func findMetaMaskNotificationPage(page *rod.Page) (*rod.Page, error) {
-	time.Sleep(time.Second * 2)
 	page.MustWaitLoad()
 	b := page.Browser()
 	var target *proto.TargetTargetInfo
-	for i := 0; i < 10; i++ {
+	for i := 0; i < transactionPageTimeout; i++ {
 		target = browser.GetTargetByTitle(b, transactionPageTitle)
 		if target != nil {
-			fmt.Println("DEBUG:", target)
 			break
 		}
+		time.Sleep(time.Second)
 	}
 	if target == nil {
 		return nil, errors.New(fmt.Sprintf("could not find page %v with any target", transactionPageTitle))
