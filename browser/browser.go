@@ -1,11 +1,13 @@
 package browser
 
 import (
+	"context"
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
 	"github.com/go-rod/rod/lib/proto"
 	"log"
 	"path/filepath"
+	"time"
 )
 
 const (
@@ -35,11 +37,46 @@ func LaunchBrowserWithExtension(path string, headless bool) *rod.Browser {
 	return rod.New().ControlURL(u).MustConnect()
 }
 
-func GetTargetByTitle(b *rod.Browser, title string) *proto.TargetTargetInfo {
+type TargetOpts func(t *proto.TargetTargetInfo) bool
+
+func GetTarget(b *rod.Browser, opts ...TargetOpts) *proto.TargetTargetInfo {
+	list, _ := proto.TargetGetTargets{}.Call(b)
+
+	for _, target := range list.TargetInfos {
+		conditionsMet := true
+
+		for _, opt := range opts {
+			if !opt(target) {
+				conditionsMet = false
+			}
+		}
+
+		if conditionsMet {
+			return target
+		}
+	}
+
+	return nil
+}
+
+func WaitForPageToBackground(b *rod.Browser, targetId proto.TargetTargetID, timeout time.Duration) error {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
 	list, _ := proto.TargetGetTargets{}.Call(b)
 	for _, target := range list.TargetInfos {
-		if target.Title == title {
-			return target
+		if target.TargetID == targetId {
+			for {
+				if target.Type != proto.TargetTargetInfoTypePage {
+					return nil
+				}
+				select {
+				case <-ctx.Done():
+					return ctx.Err()
+				default:
+					continue
+				}
+			}
 		}
 	}
 	return nil
@@ -56,11 +93,11 @@ func GetTargetByURL(b *rod.Browser, url string) *proto.TargetTargetInfo {
 }
 
 func GetPageFromTargetTitle(b *rod.Browser, title string) *rod.Page {
-	target := GetTargetByTitle(b, title)
-	if target == nil {
-		return nil
+	targetCondition := func(t *proto.TargetTargetInfo) bool {
+		return t.Title == title && t.Type == proto.TargetTargetInfoTypePage
 	}
-	if target.Type != proto.TargetTargetInfoTypePage {
+	target := GetTarget(b, targetCondition)
+	if target == nil {
 		log.Printf("could not retrieve page from target of type: %v", target.Type)
 		return nil
 	}

@@ -3,12 +3,14 @@ package app
 import (
 	"fmt"
 	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/proto"
 	"github.com/go-vgo/robotgo"
 	"github.com/michalslomczynski/bas-opencv/config"
 	"github.com/michalslomczynski/bas-opencv/cvutil"
 	"github.com/michalslomczynski/bas-opencv/util"
 	"github.com/michalslomczynski/bas-opencv/web/wallet"
 	cv "gocv.io/x/gocv"
+	"log"
 	"time"
 )
 
@@ -48,6 +50,10 @@ func Login(canvas *rod.Element) error {
 	fmt.Println("found username at", x, y)
 	util.Click(canvas, x, y)
 
+	w, err := canvas.Page().GetWindow()
+	if err == nil {
+		robotgo.MoveClick(w.Left+w.Width/2, w.Top+w.Height/2)
+	}
 	// TODO: replace with working native browser events - requires isTrusted property
 	robotgo.TypeStr(config.Cfg.Username)
 
@@ -141,10 +147,18 @@ func scrollUntilAcceptButtonEnabled(canvas *rod.Element) (int, int, error) {
 	// Blind guess offset to scrollable.
 	oy := float64(-50)
 
+	w, err := canvas.Page().GetWindow()
+	if err != nil {
+		log.Println(err)
+		w = &proto.BrowserBounds{}
+	}
+
 	for {
-		for i := 0; i < 50; i++ {
+		for i := 0; i < 5; i++ {
 			canvas.Page().Mouse.Move(float64(x), float64(y)+oy, 1)
-			canvas.Page().Mouse.Scroll(0, 10000000, 1)
+			canvas.Page().Mouse.Down(proto.InputMouseButtonLeft, 1)
+			canvas.Page().Mouse.Move(float64(x), float64(y)+oy-float64(w.Height), 10)
+			canvas.Page().Mouse.Up(proto.InputMouseButtonLeft, 1)
 		}
 
 		_, _, acc, err := cvutil.FindElementGenericWithoutRetry(canvas, acceptButtonEnabledPath, mode)

@@ -40,7 +40,7 @@ func Loop(canvas *rod.Element) error {
 		return err
 	}
 
-	r := 0
+	retry := 0
 	for {
 		img, err := cvutil.ElemToMat(canvas)
 		if err != nil {
@@ -51,10 +51,11 @@ func Loop(canvas *rod.Element) error {
 
 		if state.lobby {
 			fmt.Println("found lobby state")
-			err := SelectRoom(canvas)
+			err := SelectRoomAlt(canvas)
 			if err != nil {
 				log.Println(time.Now(), err)
 			}
+			retry = 0
 			continue
 		} else if state.round {
 			fmt.Println("found round state")
@@ -62,6 +63,7 @@ func Loop(canvas *rod.Element) error {
 			if err != nil {
 				log.Println(time.Now(), err)
 			}
+			retry = 0
 			continue
 		} else if state.menu {
 			fmt.Println("found menu state")
@@ -69,12 +71,14 @@ func Loop(canvas *rod.Element) error {
 			if err != nil {
 				log.Println(time.Now(), err)
 			}
+			retry = 0
 			continue
 		} else {
-			r++
+			findAndClickWithoutRetry(canvas, joinFailedOkButtonPath, lobbyFailedOkButtonAcc)
+			retry++
 		}
 
-		if r > resetAfter {
+		if retry > resetAfter {
 			return errors.New("app stuck in main loop, aborting...")
 		}
 	}

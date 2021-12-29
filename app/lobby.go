@@ -15,7 +15,7 @@ import (
 
 const (
 	lobbyLoopTimeout = 1 * time.Minute
-	lobbyTimeout     = 10 * time.Second
+	lobbyTimeout     = 4 * time.Second
 	// Paths
 	lobbyScrollBarPath     = prefix + "scroll_bar.png"
 	joinButtonPath         = prefix + "join_button.png"
@@ -30,17 +30,21 @@ const (
 	// Accuracies
 	lobbyScrollAcc         = 0.08
 	lobbyScrollSpecialAcc  = 0.09
-	lobbyJoinButtonAcc     = 0.04
-	lobbyFailedOkButtonAcc = 0.04
+	lobbyJoinButtonAcc     = 0.06
+	lobbyFailedOkButtonAcc = 0.05
 	roomNameAcc            = 0.06
-	readyBoxAcc            = 0.02
 )
+
+func SelectRoomAlt(canvas *rod.Element) error {
+	findAndClickWithoutRetry(canvas, joinButtonPath, lobbyJoinButtonAcc)
+	findAndClickWithoutRetry(canvas, joinFailedOkButtonPath, lobbyFailedOkButtonAcc)
+
+	return nil
+}
 
 func SelectRoom(canvas *rod.Element) error {
 	ctx, cancel := context.WithTimeout(context.Background(), lobbyLoopTimeout)
 	defer cancel()
-
-	scrollLobby(canvas)
 
 	for {
 		x, y, err := findJoinButton(canvas)

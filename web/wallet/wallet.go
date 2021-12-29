@@ -7,6 +7,7 @@ import (
 	"github.com/michalslomczynski/bas-opencv/browser"
 	"github.com/michalslomczynski/bas-opencv/config"
 	"github.com/pkg/errors"
+	"strings"
 	"time"
 )
 
@@ -79,9 +80,13 @@ func SignInToWallet(b *rod.Browser) (*rod.Page, error) {
 func waitForMetaMaskPageWithTimeout(b *rod.Browser, timeout time.Duration) *rod.Page {
 	c := make(chan *rod.Page, 1)
 
+	targetCondition := func(t *proto.TargetTargetInfo) bool {
+		return t.Title == extensionPageTitle
+	}
+
 	go func() {
 		for {
-			target := browser.GetTargetByTitle(b, extensionPageTitle)
+			target := browser.GetTarget(b, targetCondition)
 			if target == nil {
 				continue
 			}
@@ -137,6 +142,7 @@ func ConnectWithMetamask(page *rod.Page) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -151,41 +157,53 @@ func SelectMetaMask(page *rod.Page) error {
 }
 
 func SignTransaction(page *rod.Page) error {
-	walletPage, err := findMetaMaskNotificationPage(page)
+	pageSearchOpt := func(t *proto.TargetTargetInfo) bool {
+		return strings.Contains(t.URL, "transaction")
+	}
+
+	walletPage, err := findMetaMaskNotificationPage(page, pageSearchOpt)
 	if err != nil {
 		return err
 	}
 
-	err = rod.Try(func() {
-		walletPage.Timeout(selectorsTimeout)
-		walletPage.MustElement(authorizeTransactionSignButtonSelector).MustClick()
-	})
+	el, err := walletPage.Element(authorizeTransactionSignButtonSelector)
 	if err != nil {
-		return err
+		return errors.New("could not find sign in button")
 	}
+	el.Click(proto.InputMouseButtonLeft)
 
 	return nil
 }
 
-func findMetaMaskNotificationPage(page *rod.Page) (*rod.Page, error) {
+func findMetaMaskNotificationPage(page *rod.Page, opts ...browser.TargetOpts) (*rod.Page, error) {
+	fmt.Println("Looking for notification page")
+
+	targetTitleCond := func(t *proto.TargetTargetInfo) bool {
+		return t.Title == transactionPageTitle
+	}
+	opts = append(opts, targetTitleCond)
+
 	page.MustWaitLoad()
 	b := page.Browser()
+
 	var target *proto.TargetTargetInfo
 	for i := 0; i < transactionPageTimeout; i++ {
-		target = browser.GetTargetByTitle(b, transactionPageTitle)
+		target = browser.GetTarget(b, opts...)
 		if target != nil {
 			break
 		}
 		time.Sleep(time.Second)
 	}
+	fmt.Println("DEBUG: ", target)
 	if target == nil {
-		return nil, errors.New(fmt.Sprintf("could not find page %v with any target", transactionPageTitle))
+		return nil, errors.New(fmt.Sprintf("could not find page %+v with any target", transactionPageTitle))
 	}
 
 	walletPage, err := b.PageFromTarget(target.TargetID)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("DEBUG: found target id", walletPage.TargetID)
 
 	return walletPage, nil
 }
