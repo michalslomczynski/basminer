@@ -2,12 +2,13 @@ package browser
 
 import (
 	"context"
-	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/launcher"
-	"github.com/go-rod/rod/lib/proto"
 	"log"
 	"path/filepath"
 	"time"
+
+	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/launcher"
+	"github.com/go-rod/rod/lib/proto"
 )
 
 const (
@@ -33,6 +34,7 @@ func LaunchBrowserWithExtension(path string, headless bool) *rod.Browser {
 	u := launcher.New().
 		Set("load-extension", extPath).
 		Headless(headless).
+		NoSandbox(true).
 		MustLaunch()
 	return rod.New().ControlURL(u).MustConnect()
 }

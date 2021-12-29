@@ -2,15 +2,16 @@ package app
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/go-rod/rod"
 	"github.com/michalslomczynski/bas-opencv/cvutil"
 	"github.com/pkg/errors"
-	"log"
-	"time"
 )
 
 const (
-	resetAfter = 20
+	resetAfter = 10
 )
 
 func MainLopp() {

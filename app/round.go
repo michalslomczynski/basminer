@@ -3,11 +3,12 @@ package app
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/go-rod/rod"
 	"github.com/michalslomczynski/bas-opencv/cvutil"
 	"github.com/michalslomczynski/bas-opencv/util"
 	"github.com/pkg/errors"
-	"time"
 )
 
 const (
@@ -21,10 +22,10 @@ const (
 	doneButtonPath       = prefix + "done_button.png"
 	// Accuracies
 	battleModeBannerAcc = 0.01
-	stoneButtonAcc      = 0.03
-	exitGameButtonAcc   = 0.03
-	finishButtonAcc     = 0.03
-	doneButtonAcc       = 0.03
+	stoneButtonAcc      = 0.1
+	exitGameButtonAcc   = 0.06
+	finishButtonAcc     = 0.06
+	doneButtonAcc       = 0.06
 	readyBoxAcc         = 0.07
 )
 
